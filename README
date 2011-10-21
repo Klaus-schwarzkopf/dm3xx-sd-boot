@@ -1,0 +1,28 @@
+
+			SD card boot and flashing tool for DM355 and DM365
+
+				Release 6
+ 				Copyright 2009 by Constantine Shulyupin
+				GNU General Public License
+				
+
+Updates: http://www.linux-davinci.info/data/boot/
+
+Online documentation: http://wiki.davincidsp.com/index.php/SD_card_boot_and_flashing_tool_for_DM355_and_DM365
+
+6th release notes:
+Compiled with gcc 4.2.0 from MVL 5
+Improved scrips
+Updates DM355 support
+Fixed flashing of kernel and root FS
+
+5th release notes:
+Added DM365 support.
+
+4th release notes:
+Used original UBL ( ublDM355-nand.bin ). It solves demo problems.
+Fixed NAND erase.
+Improved script dm355_sd_boot
+Introduced default configuration dm355_sd.config
+Enlarged root FS and added demo applications without data
+Boot time is 20 sec

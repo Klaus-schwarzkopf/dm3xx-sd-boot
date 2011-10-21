@@ -1,0 +1,168 @@
+#!/bin/sh 
+
+#  PROJECT     : TI Booting and Flashing Utilities
+#  AUTHOR      : Constantine Shulyupin http://www.LinuxDriver.co.il/
+#  DESC        : SD card boot and flashing tool for DM355 and DM365
+#  LICENSE     : GNU General Public License
+
+set -o allexport
+
+SUCCESS="\\033[2;32m"
+#BLUE="\\033[2;34m"
+BLUE="\\033[1;34m"
+RED="\\033[0;31m"
+WARNING="\\033[0;33m"
+NOCOLOR="\\033[0;39m"
+GREENU="\033[4;32m"
+sdc_mnt=/mnt/sdc
+u=DM35x_FlashAndBootUtils_1_10_sd
+arch=`uname  -m | sed -e "s/i.86.*/x86/" -e "s/arm.*/arm/" -e "s/x86.*/x86/"`
+export PATH=$PATH:bin.$arch
+
+#sdboot=~/dvsdk_1_30_00_40/PSP_01_20_00_014/bin/dm3xx/ublDM355-nand.bin
+#sdboot=ubl3/ubl3.bin
+#sdboot=$u/DM35x/GNU/echo/echo_DM35x_nand.bin
+#sdboot=echo/echo_DM35x.bin
+. ./dm3xx_sd.config
+sdboot=`ls sdcard_flash/sdcard_flash_$platform.bin`
+
+echo_success() {
+  $SETCOLOR_SUCCESS
+  printf  "$SUCCESS$*$NOCOLOR\n"
+}
+
+
+echo_failure() {
+  printf "$RED$*$NOCOLOR\n"
+}
+
+dm3xx_boot_data_addr_get()
+{
+	if [ -z "$dm3xx_boot_data_addr" ]; then 
+		sd=$1
+		if [ -z "$sd" ]; then 
+			echo_failure Please specify right SD card device, e.g. /dev/sdc
+			return 1
+		fi
+		dd if=$sd of=/tmp/image.fat bs=1024 count=10000
+		export dm3xx_boot_data_addr=0x$(od -A x -t x8 /tmp/image.fat | grep "$(echo -n dm3xx_boot_magic | od -A n -t x8)" | cut -f 1 -d ' ')
+
+	fi
+	printf "dm3xx_boot_data_addr=$dm3xx_boot_data_addr\n"
+}
+
+sdcard_dm3xx_boot()
+{
+	sd=$1
+	if [ -z "$sd" ]; then 
+		echo_failure Please specify right SD card device, e.g. /dev/sdc
+		return 1
+	fi
+	dm3xx_boot_rec=dm3xx_boot_rec
+	rm -f $dm3xx_boot_rec
+	dm3xx_boot_data_addr_get $sd
+	dm3xx_boot_make_image	
+	# put dm3xx_boot_rec on seek 8th block between MBR and FAT on fat32
+	dd if=$dm3xx_boot_rec of=$sd seek=8 2> /dev/null || ( echo_failure Failed to copy boot record to SD card && return 1) || return
+	dd if=$sd of=/tmp/image.fat bs=1024 count=10000
+	#dd if=$dm3xx_boot_rec of=$sd seek=8 2> /dev/null || return
+	#fsck -al $part
+	echo_success dm3xx boot record is written
+	chmod 777 /tmp/image.fat
+}
+
+sdcard_fat() 
+{
+	sd=$1
+	if [ -z "$sd" ]; then 
+		echo_failure Please specify SD card device, e.g. /dev/sdc
+		return 1
+	fi
+	test -b ${sd}1 && part=${sd}1
+	test -b ${sd}p1 && part=${sd}p1
+	sfdisk -s > /dev/null 2> /dev/null || ( echo_failure You need utility sfdisk && return 1 ) || return
+	umount $sdc_mnt 2> /dev/null || true
+	umount $part 2> /dev/null || true
+	printf "cleaning SD card\n"
+	dd if=/dev/zero of=${sd} bs=1024 count=1000
+	umount $part 2> /dev/null || true
+	#echo ",,b,*" 2> /dev/null | sfdisk -q $sd  || echo failed to format SD card && return
+	printf ",40,b,*\n,,,*\n"  | sfdisk -uM -q $sd  || ( echo_failure Failed to format SD card && return 1 ) || return 
+	mkfs.vfat -F 32 $part
+	#mkfs $part
+	#dosfslabel $part dm3xx-boot
+	#e2label $part dm3xx-boot
+	mkdir -p $sdc_mnt
+	mount $part $sdc_mnt || ( echo_failure failed to mount SD card && return 1 ) || return
+	dd of=$sdc_mnt/dm3xx.dat bs=1024 seek=15000 count=0 # pad file 7MB
+	#dd if=/dev/zero of=$sdc_mnt/dm3xx.dat bs=1024 count=15000
+	echo "dm3xx_boot_magic\n" | dd conv=notrunc of=$sdc_mnt/dm3xx.dat || (echo_failure failed to create data file && return 1) || return
+	sync
+	ls -l $sdc_mnt
+	umount  $sdc_mnt
+	echo_success SD card $sd formatted
+}
+
+sdcard_data()
+{
+	case $arch in
+	arm)
+		# mkdir /media/sdc; mount /dev/mmcblk0p1 /media/sdc/
+		;;
+	x86)
+		;;
+	esac 
+	set -a
+	#test -b ${sd}1 && part=${sd}1
+	#test -b ${sd}p1 && part=${sd}p1
+	#umount $sdc_mnt 2> /dev/null
+	#mkdir -p $sdc_mnt
+	#mount $sdc_mnt 2> /dev/null || ( sleep 1 && mount $part $sdc_mnt ) \
+	#	|| ( echo_failure Failed to mount SD card. Insert your card or add \"\$part $sdc_mnt vfat noauto,owner,user 0 0\" to /etc/fstab && return 1 ) \
+	#	|| return
+	echo "copying data to"
+	dm3xx_boot_data=$data_file
+	dm3xx_boot_make_image	|| ( echo_failure failed to build data image && return 1 ) || return
+	echo "syncing"
+	sync
+	echo_success DM355 boot data copied in data file $data_file on
+	df $data_file
+}
+
+cmd=$1
+if [ -z "$cmd" ] ; then
+		printf "$GREENU""SD card boot and flashing tool for DM355 and DM365$NOCOLOR\n"
+		printf "2009, by Constantine Shulyupin http://www.LinuxDriver.co.il/ti/dm3xx/sd_boot/\n"
+		printf "$0 usage:\n"
+		printf "$BLUE""Format SD card for DM355 boot, run from user 'root': \n$NOCOLOR"
+		printf "\t# $0 format /dev/<sd device>\n"
+		printf "${BLUE}Load boot data to SD card, you may run from regular user:\n$NOCOLOR"
+		printf "\t$ $0 data <data file dm3xx.dat> <ubl file> <u-boot file> <uImage file> <rootfs.gz file>\n"
+else
+shift
+sd=$1
+case "$cmd" in
+	("format"):
+		sdcard_fat $* 
+		sdcard_dm3xx_boot $*
+		echo Please reinsert the card for auto mounting or mount it manually
+		;;
+	("data"):
+		# arguments overwrite variables
+		data_file=${1:-$data_file}
+		ubl=${2:-$ubl}
+		uboot=${3:-$uboot}
+		kernel=${4:-$kernel}
+		rootfs=${5:-$rootfs}
+		sdcard_data
+		;;
+	("q"):
+		;;
+		(*):
+		echo_failure unknown command \"$cmd\"
+esac
+
+fi
+set -o allexport
+
+#$*

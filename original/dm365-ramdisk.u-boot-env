@@ -1,0 +1,3 @@
+set bootcmd 'nand read 0x82000000 0x600000 0x400000;nboot 0x80700000 0 0x400000;bootm'
+set bootargs mem=76M console=ttyS0,115200n8 root=/dev/ram0 rw initrd=0x82000000,8M ip=off video=davincifb:vid0=OFF:vid1=OFF:osd0=720x576x16,4050K dm365_imp.oper_mode=0 davinci_capture.device_type=4
+saveenv

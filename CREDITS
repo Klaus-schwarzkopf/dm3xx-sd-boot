@@ -1,0 +1,12 @@
+#   This is at least a partial credits-file of individual people that
+#   have contributed to the this project. It is sorted by name and
+#   formatted to allow easy grepping and beautification by scripts.
+#   The fields are: name (N), email (E), web-address (W), PGP key ID
+#   and fingerprint (P), description (D), and snail-mail address (S).
+#
+
+N: Constantine Shulyupin
+E: const@LinuxDriver.co.il
+W: http://www.LinuxDriver.co.il/
+D: SD card boot and flashing tool for DM355 and DM365
+D: uses TI DM35x FlashAndBootUtils 1.10 SFT, TI flash_utils

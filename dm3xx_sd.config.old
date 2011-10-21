@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Adjust this file for your needs
+
+a=${platform:=DM36x} # default platform
+
+case $platform in
+DM36x)
+	ubl=original/UBL_DM36x_NAND.bin
+	uboot=original/u-boot-leopard365.bin
+	kernel=original/uImage-dm365
+	rootfs=original/ramdisk.gz
+	;;
+DM35x)
+	ubl=original/ublDM355-nand.bin
+	uboot=original/u-boot-1.2.0-dm355_leopard.bin
+	kernel=original/uImage-dm355
+	rootfs=original/ramdisk_leopard355.gz
+	;;
+esac 
+
+# Expected location boot data file on autimatically mounted SD card.
+# Change if it is mounted at another location.
+data_file=`echo /media/*/dm3xx.dat`
