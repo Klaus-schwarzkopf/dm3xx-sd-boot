@@ -6,9 +6,19 @@
 				GNU General Public License
 				
 
-Updates: http://www.linux-davinci.info/data/boot/
+Updates: 
+* http://www.linux-davinci.info/data/boot/
+* https://github.com/Klaus-schwarzkopf/dm3xx-sd-boot
 
-Online documentation: http://wiki.davincidsp.com/index.php/SD_card_boot_and_flashing_tool_for_DM355_and_DM365
+Online documentation: 
+* http://wiki.davincidsp.com/index.php/SD_card_boot_and_flashing_tool_for_DM355_and_DM365
+* http://wiki.linpert.de/index.php?title=LeopardBoard/SD_CARD
+
+2011-10-21
+change to CodeSourcery toolchain 2009q1: arm-none-linux-gnueabi-
+merge the leopard flashing tool
+fixed some bugs
+add own kernel, fs and uboot
 
 6th release notes:
 Compiled with gcc 4.2.0 from MVL 5
