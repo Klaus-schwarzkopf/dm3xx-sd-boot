@@ -681,10 +681,11 @@ int sdcard_nand_user(void)	//      copy from SDC to NAND flash
 //		print(BOLD " * Flashing Root FS\n" NOCOLOR);
 //		sdcard_read(flasher_data + ROOTFS_SDC, ROOTFS_ADDR, ROOTFS_SIZE);
 //		status = nand_write(nand, ROOTFS_FLASH, ROOTFS_ADDR, ROOTFS_SIZE);
-
-		print("Start u-boot at: ");
-		print_hex(UBOOT_ADDR);
-		((jumpf) UBOOT_ADDR + 0x800) ();
+//
+//		print("Start u-boot at: ");
+//		print_hex(UBOOT_ADDR);
+//		((jumpf) UBOOT_ADDR + 0x800) ();
+		print(BOLD "\nRestart me from nand\n" NOCOLOR);
 		break;
 	case 'd':
 		trvx(DEVICE_NAND_RBL_SEARCH_START_BLOCK * nand->dataBytesPerPage * nand->pagesPerBlock);
