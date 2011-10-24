@@ -601,7 +601,7 @@ int sdcard_nand_user(void)	//      copy from SDC to NAND flash
 	print("u - install ubl only, ");
 	//print("k - boot kernel from Image by direct jump, ");
 	print("d - nand flash dump\n");
-	print("9 - install to leopardboard\n");
+	print("9 - install to leopardboard, no kernel or fs (ECC error)\n");
 	char *modes = mode;
 	do {
 		print(" > ");
@@ -674,13 +674,17 @@ int sdcard_nand_user(void)	//      copy from SDC to NAND flash
 		sdcard_read(flasher_data + UBOOT_SDC, UBOOT_ADDR, UBOOT_SIZE);
 		status = nand_write(nand, UBOOT_FLASH, UBOOT_ADDR, UBOOT_SIZE);
 
-		print(BOLD " * Flashing kernel\n" NOCOLOR);
-		sdcard_read(flasher_data + KERNEL_SDC, KERNEL_ADDR, KERNEL_SIZE);
-		status = nand_write(nand, KERNEL_FLASH, KERNEL_ADDR, KERNEL_SIZE);
+//		print(BOLD " * Flashing kernel\n" NOCOLOR);
+//		sdcard_read(flasher_data + KERNEL_SDC, KERNEL_ADDR, KERNEL_SIZE);
+//		status = nand_write(nand, KERNEL_FLASH, KERNEL_ADDR, KERNEL_SIZE);
+//
+//		print(BOLD " * Flashing Root FS\n" NOCOLOR);
+//		sdcard_read(flasher_data + ROOTFS_SDC, ROOTFS_ADDR, ROOTFS_SIZE);
+//		status = nand_write(nand, ROOTFS_FLASH, ROOTFS_ADDR, ROOTFS_SIZE);
 
-		print(BOLD " * Flashing Root FS\n" NOCOLOR);
-		sdcard_read(flasher_data + ROOTFS_SDC, ROOTFS_ADDR, ROOTFS_SIZE);
-		status = nand_write(nand, ROOTFS_FLASH, ROOTFS_ADDR, ROOTFS_SIZE);
+		print("Start u-boot at: ");
+		print_hex(UBOOT_ADDR);
+		((jumpf) UBOOT_ADDR + 0x800) ();
 		break;
 	case 'd':
 		trvx(DEVICE_NAND_RBL_SEARCH_START_BLOCK * nand->dataBytesPerPage * nand->pagesPerBlock);
