@@ -29,10 +29,11 @@ $(BIN)/dm3xx_boot_make_image:	dm3xx_boot_make_image.c
 
 install:
 	./dm3xx_sd_boot data
+	./dm3xx_sd_boot copy
 
 $(BIN)/%.o: %.c
 		@mkdir -p $(BIN)
 		$(CC) $(CFLAGS) $< -c -o $@   
 		
 %.src: %.cmd
-		   mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n "flash-all" -d $< $@
+		mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n "flash-all" -d $< $@

@@ -19,6 +19,9 @@ u=DM35x_FlashAndBootUtils_1_10_sd
 arch=`uname  -m | sed -e "s/i.86.*/x86/" -e "s/arm.*/arm/" -e "s/x86.*/x86/"`
 export PATH=$PATH:bin.$arch
 
+#Partition 
+SDCARD_PARTITION_SIZE=300 
+
 #sdboot=~/dvsdk_1_30_00_40/PSP_01_20_00_014/bin/dm3xx/ublDM355-nand.bin
 #sdboot=ubl3/ubl3.bin
 #sdboot=$u/DM35x/GNU/echo/echo_DM35x_nand.bin
@@ -87,7 +90,7 @@ sdcard_fat()
 	dd if=/dev/zero of=${sd} bs=1024 count=1000
 	umount $part 2> /dev/null || true
 	#echo ",,b,*" 2> /dev/null | sfdisk -q $sd  || echo failed to format SD card && return
-	printf ",40,b,*\n,,,*\n"  | sfdisk -uM -q $sd  || ( echo_failure Failed to format SD card && return 1 ) || return 
+	printf ",${SDCARD_PARTITION_SIZE},b,*\n,,,*\n"  | sfdisk -uM -q $sd  || ( echo_failure Failed to format SD card && return 1 ) || return 
 	mkfs.vfat -F 32 $part
 	#mkfs $part
 	#dosfslabel $part dm3xx-boot
@@ -129,6 +132,16 @@ sdcard_data()
 	df $data_file
 }
 
+sdcard_cp_data()
+{
+
+	sdcard_path=${data_file%/*}
+	#echo $sdcard_path
+	cp -f $kernel $sdcard_path/
+	cp -f $rootfs $sdcard_path/
+	cp -f flash_dm365_leopardboard.src $sdcard_path/
+}
+
 cmd=$1
 if [ -z "$cmd" ] ; then
 		printf "$GREENU""SD card boot and flashing tool for DM355 and DM365$NOCOLOR\n"
@@ -156,9 +169,13 @@ case "$cmd" in
 		rootfs=${5:-$rootfs}
 		sdcard_data
 		;;
+	("copy")
+		sdcard_cp_data
+		;;
+		
 	("q"):
 		;;
-		(*):
+	(*):
 		echo_failure unknown command \"$cmd\"
 esac
 
