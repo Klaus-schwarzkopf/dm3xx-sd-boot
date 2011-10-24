@@ -4,9 +4,9 @@
 #define MB 0x100000
 
 // locatins in RAM
-
-//#define UBOOT_ADDR	(void*)0x81080000
-#define UBOOT_ADDR	(void*)0x85000000
+#define UBL_ADDR	(void*)0x81060000
+#define UBOOT_ADDR	(void*)0x81080000
+//#define UBOOT_ADDR	(void*)0x85000000
 #define KERNEL_ADDR	(void*)0x80700000 // uImage
 //#define KERNEL_ADDR	(void*)0x80008000 // Image, ready to run
 #define ROOTFS_ADDR	(void*)0x82000000

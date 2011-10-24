@@ -513,7 +513,7 @@ int uboot_install(NAND_InfoHandle nand)
 	sdcard_read(flasher_data + UBOOT_SDC, UBOOT_ADDR, UBOOT_SIZE);
 
 	header.magicNum = UBL_MAGIC_BIN_IMG;
-	header.entryPoint = (int)UBOOT_ADDR;
+	header.entryPoint = (int)UBOOT_ADDR; /* UBOOT_FLASH; */
 	header.page = 1;	// The page is always page 0 for the header, so we use page 1 for data
 	header.block = DEVICE_NAND_UBL_SEARCH_START_BLOCK;
 	header.ldAddress = (int)UBOOT_ADDR;
@@ -665,6 +665,22 @@ int sdcard_nand_user(void)	//      copy from SDC to NAND flash
 		NAND_globalErase_with_bb_check(nand);
 		// install UBL, u-boot, kernel, and file sys
 		//sdcard_install(nand);
+		int status = 0;
+		print(BOLD " * Flashing ubl\n" NOCOLOR);
+		sdcard_read(flasher_data + UBL_SDC, UBL_ADDR, UBL_SIZE);
+		status = nand_write(nand, UBL_FLASH, UBL_ADDR, UBL_SIZE);
+
+		print(BOLD " * Flashing u-boot\n" NOCOLOR);
+		sdcard_read(flasher_data + UBOOT_SDC, UBOOT_ADDR, UBOOT_SIZE);
+		status = nand_write(nand, UBOOT_FLASH, UBOOT_ADDR, UBOOT_SIZE);
+
+		print(BOLD " * Flashing kernel\n" NOCOLOR);
+		sdcard_read(flasher_data + KERNEL_SDC, KERNEL_ADDR, KERNEL_SIZE);
+		status = nand_write(nand, KERNEL_FLASH, KERNEL_ADDR, KERNEL_SIZE);
+
+		print(BOLD " * Flashing Root FS\n" NOCOLOR);
+		sdcard_read(flasher_data + ROOTFS_SDC, ROOTFS_ADDR, ROOTFS_SIZE);
+		status = nand_write(nand, ROOTFS_FLASH, ROOTFS_ADDR, ROOTFS_SIZE);
 		break;
 	case 'd':
 		trvx(DEVICE_NAND_RBL_SEARCH_START_BLOCK * nand->dataBytesPerPage * nand->pagesPerBlock);
