@@ -140,6 +140,7 @@ sdcard_cp_data()
 	cp -f $kernel $sdcard_path/
 	cp -f $rootfs $sdcard_path/
 	cp -f flash_dm365_leopardboard.src $sdcard_path/
+	sync
 }
 
 cmd=$1
