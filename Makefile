@@ -19,6 +19,7 @@ tags:
 clean:
 	make -C sdcard_flash PLATFORM=DM36x $@
 	make -C sdcard_flash PLATFORM=DM35x $@
+	#make -C ti-flash-utils/DM36x/GNU/ $@
 	rm -f dm3xx_boot_make_image
 	rm -f -r bin.*
 	rm -f flash_dm365_leopardboard.src
@@ -37,3 +38,11 @@ $(BIN)/%.o: %.c
 		
 %.src: %.cmd
 		mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n "flash-all" -d $< $@
+
+#build_ubl:
+	#make  -C ti-flash-utils/DM36x/GNU/ubl/build/ TYPE=nand 
+	#make  -C ti-flash-utils/DM36x/GNU/ubl/build/ TYPE=sdmmc 
+
+#build_bc:
+	#make -C ti-flash-utils/DM36x/GNU/bc/
+	
