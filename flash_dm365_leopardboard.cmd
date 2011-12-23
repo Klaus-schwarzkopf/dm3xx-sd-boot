@@ -21,4 +21,5 @@ setenv bootcmd 'nboot 0x87000000 0 0x00400000; bootm'
 setenv autostart yes
 setenv bootdelay 3
 saveenv
+boot
 
